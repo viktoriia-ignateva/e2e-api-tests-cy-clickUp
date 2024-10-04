@@ -25,8 +25,8 @@ describe('Creating space', () => {
         })
 
         // Positive Test Cases
-        context('with minimal valid fields', () => {
-            it('creates a task and shows it in UI', function(){
+        context('with valid params', () => {
+            it('creates a task with minimal valid fields and shows it in UI ', function(){
                 const options = {
                     ...baseOptions,
                     body: {
@@ -44,25 +44,11 @@ describe('Creating space', () => {
                 })
             })
 
-            after(function () {
-                const optionsForDelete = {
-                    method: 'DELETE',
-                    url: `https://api.clickup.com/api/v2/task/${this.taskId}`,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
-                    }
-                }
-                cy.request(optionsForDelete)
-            })
-        })
-
-        context('with all valid fields', () => {
-            it('creates a task and shows it in UI', function(){
+            it('creates a task with all valid fields and shows it in UI', function(){
                 const options = {
                     ...baseOptions,
                     body: {
-                        "name": "New Task via API cy",
+                        "name": "New Task via API cy (!@#$%^&*)",
                         "description": "Task Description",
                         "tags": [
                             "tag name"
@@ -78,10 +64,10 @@ describe('Creating space', () => {
                 }
 
                 cy.request(options).then((resp) => {
-                    cy.get('[data-test="task-row-main__New Task via API cy"]', {timeout: 60000}).should('be.visible')
-                    cy.get('[data-test="task-row-main__New Task via API cy"]').click()
+                    cy.get('[data-test="task-row-main__New Task via API cy (!@#$%^&*)"]', {timeout: 60000}).should('be.visible')
+                    cy.get('[data-test="task-row-main__New Task via API cy (!@#$%^&*)"]').click()
                     cy.get('[data-test="task-view-task-label__taskid-button"]').should('contain', resp.body.id)
-                    cy.get('[data-test="task-title__title-overlay"]').should('contain', 'New Task via API cy')
+                    cy.get('[data-test="task-title__title-overlay"]').should('contain', 'New Task via API cy (!@#$%^&*)')
                     cy.get('[data-test="priorities-view__item-label-Urgent"]').should('contain', 'Urgent')
                     cy.get('[data-test="task-editor"] > div > div').should('contain', 'Task Description')
                     cy.get('[data-test="tags-select__name-shadow-tag name"]').should('contain', 'tag name')
@@ -91,16 +77,65 @@ describe('Creating space', () => {
                 })
             })
 
-            after(function () {
-                const optionsForDelete = {
-                    method: 'DELETE',
-                    url: `https://api.clickup.com/api/v2/task/${this.taskId}`,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
+            afterEach(function () {
+                if (this.taskId) {
+                    const optionsForDelete = {
+                        method: 'DELETE',
+                        url: `https://api.clickup.com/api/v2/task/${this.taskId}`,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
+                        }
+                    }
+                    cy.request(optionsForDelete)
+                }
+            })
+        })
+
+        // Negative Test Cases
+        context('with invalid params', () => {
+            it('returns status code 400 when missing task name', () => {
+                const options = {
+                    ...baseOptions,
+                    body: {
+                        name: ''
                     }
                 }
-                cy.request(optionsForDelete)
+
+                cy.request({ ...options, failOnStatusCode: false }).then((resp) => {
+                    expect(resp.status).to.eq(400)
+                    expect(resp.body.err).to.contain('Task name invalid')
+                })
+            })
+
+            it('returns status code 400 when invalid data type', () => {
+                const options = {
+                    ...baseOptions,
+                    body: {
+                        "name": "New Task with invalid data type via API cy",
+                        "due_date": "10/10/2024",
+                    }
+                }
+
+                cy.request({ ...options, failOnStatusCode: false }).then((resp) => {
+                    expect(resp.status).to.eq(400)
+                    expect(resp.body.err).to.contain('Date invalid')
+                })
+            })
+
+            it('returns status code 400 when another user list_id used', () => {
+                const options = {
+                    ...baseOptions,
+                    url: 'https://api.clickup.com/api/v2/list/8cjutq1-292/task',
+                    body: {
+                        "name": "New Task with invalid data type via API cy",
+                    }
+                }
+
+                cy.request({ ...options, failOnStatusCode: false }).then((resp) => {
+                    expect(resp.status).to.eq(400)
+                    expect(resp.body.err).to.contain('List ID invalid')
+                })
             })
         })
     })
