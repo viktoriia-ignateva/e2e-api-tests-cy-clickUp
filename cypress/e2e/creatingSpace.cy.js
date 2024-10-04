@@ -25,7 +25,7 @@ describe('Creating space', () => {
         })
 
         // Positive Test Case
-        context('with correct params', () => {
+        context('with minimal valid fields', () => {
             it('creates a new space and returns status code 200', () => {
                 // ToDo no options inside tests?
                 const options = {
@@ -60,6 +60,8 @@ describe('Creating space', () => {
                 })
             })
         })
+
+        // ToDo add test with all fields
 
         // Negative Test Cases
         context('with invalid authorization token', () => {
