@@ -9,4 +9,8 @@ module.exports = defineConfig({
     watchForFileChanges: false,
     numTestsKeptInMemory: 5,
   },
+  reporter: 'cypress-multi-reporters',
+  reporterOptions: {
+    configFile: 'reporter-config.json',
+  },
 });
