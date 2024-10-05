@@ -1,4 +1,5 @@
 const { defineConfig } = require("cypress");
+require('dotenv').config()
 
 module.exports = defineConfig({
   e2e: {
@@ -12,5 +13,8 @@ module.exports = defineConfig({
   reporter: 'cypress-multi-reporters',
   reporterOptions: {
     configFile: 'reporter-config.json',
+  },
+  env: {
+    API_TOKEN: process.env.API_TOKEN
   },
 });

@@ -1,29 +1,3 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-
 Cypress.Commands.add('login', (email, password) => {
     cy.clearCookies()
     cy.clearAllLocalStorage()
@@ -33,4 +7,20 @@ Cypress.Commands.add('login', (email, password) => {
     cy.get('[data-test="login-password-input"]').type(password)
     cy.get('[data-test="login-submit"]').click()
     cy.get('[data-test="simple-sidebar"]', {timeout: 30000}).should('be.visible')
+})
+
+Cypress.Commands.add('apiRequest', (method, route, { headers, body, failOnStatusCode } = {}) => {
+    const options = {
+        method: method || 'GET',
+        url: `${Cypress.env('HOST')}${route}`,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: Cypress.env('API_TOKEN'),
+            ...headers
+        },
+        body,
+        failOnStatusCode,
+    }
+
+    return cy.request(options)
 })

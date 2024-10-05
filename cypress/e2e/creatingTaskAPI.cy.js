@@ -7,14 +7,7 @@ import {
     taskTitleSel
 } from "../support/selectors";
 
-const baseOptions = {
-    method: 'POST',
-    url: 'https://api.clickup.com/api/v2/list/901506912843/task',
-    headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
-    }
-}
+const LIST_ID = 901506912843
 
 describe('Creating Task via API', () => {
     before(() => {
@@ -27,14 +20,13 @@ describe('Creating Task via API', () => {
     context('with valid params', () => {
         it('creates a task with minimal valid fields and shows it in UI ', function () {
             const taskName = 'New Task via API with minimal valid fields cy'
-            const options = {
-                ...baseOptions,
+            const params = {
                 body: {
                     "name": taskName
                 }
             }
 
-            cy.request(options).then((resp) => {
+            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
                 cy.get(taskSel(taskName), {timeout: 60000}).click()
                 cy.get(taskIdButtonSel).should('contain', resp.body.id)
                 cy.get(taskTitleSel).should('contain', taskName)
@@ -47,8 +39,8 @@ describe('Creating Task via API', () => {
             const taskName = 'New Task via API cy (!@#$%^&*)'
             const priorityLabel = 'Urgent'
             const tagName = 'tag name'
-            const options = {
-                ...baseOptions,
+
+            const params = {
                 body: {
                     "name": taskName,
                     "description": "Task Description",
@@ -65,7 +57,7 @@ describe('Creating Task via API', () => {
                 }
             }
 
-            cy.request(options).then((resp) => {
+            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
                 cy.get(taskSel(taskName), {timeout: 60000}).click()
                 cy.get(taskIdButtonSel).should('contain', resp.body.id)
                 cy.get(taskTitleSel).should('contain', taskName)
@@ -80,15 +72,7 @@ describe('Creating Task via API', () => {
 
         afterEach(function () {
             if (this.taskId) {
-                const optionsForDelete = {
-                    method: 'DELETE',
-                    url: `https://api.clickup.com/api/v2/task/${this.taskId}`,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
-                    }
-                }
-                cy.request(optionsForDelete)
+                cy.apiRequest('DELETE', `/api/v2/task/${this.taskId}`,)
             }
         })
     })
@@ -96,44 +80,43 @@ describe('Creating Task via API', () => {
     // Negative Test Cases
     context('with invalid params', () => {
         it('returns status code 400 when missing task name', () => {
-            const options = {
-                ...baseOptions,
+            const params = {
                 body: {
                     name: ''
-                }
+                },
+                failOnStatusCode: false
             }
 
-            cy.request({...options, failOnStatusCode: false}).then((resp) => {
+            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
                 expect(resp.status).to.eq(400)
                 expect(resp.body.err).to.contain('Task name invalid')
             })
         })
 
         it('returns status code 400 when invalid data type', () => {
-            const options = {
-                ...baseOptions,
+            const params = {
                 body: {
                     "name": "New Task with invalid data type via API cy",
                     "due_date": "10/10/2024",
-                }
+                },
+                failOnStatusCode: false
             }
 
-            cy.request({...options, failOnStatusCode: false}).then((resp) => {
+            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
                 expect(resp.status).to.eq(400)
                 expect(resp.body.err).to.contain('Date invalid')
             })
         })
 
         it('returns status code 400 when another user list_id used', () => {
-            const options = {
-                ...baseOptions,
-                url: 'https://api.clickup.com/api/v2/list/8cjutq1-292/task',
+            const params = {
                 body: {
                     "name": "New Task with invalid data type via API cy",
-                }
+                },
+                failOnStatusCode: false
             }
 
-            cy.request({...options, failOnStatusCode: false}).then((resp) => {
+            cy.apiRequest('POST', '/api/v2/list/8cjutq1-292/task', params).then((resp) => {
                 expect(resp.status).to.eq(400)
                 expect(resp.body.err).to.contain('List ID invalid')
             })

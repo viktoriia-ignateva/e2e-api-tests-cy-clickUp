@@ -1,19 +1,11 @@
-import { spaceSel } from '../support/selectors';
-
-const baseOptions = {
-    method: 'POST',
-    url: 'https://api.clickup.com/api/v2/team/9015570628/space',
-    headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
-    }
-}
+import {spaceSel} from '../support/selectors';
 
 describe('Creating space', () => {
     context('when creating a new space via API', () => {
         // ToDo check that no spaces there before run tests
         before(() => {
-            cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
+            // cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
+            cy.visit(`https://app.clickup.com/${Cypress.env('TEAM_ID')}/home`)
         })
 
         // Positive Test Case
@@ -22,15 +14,14 @@ describe('Creating space', () => {
 
             it('creates a new space and returns status code 200', () => {
                 // ToDo no options inside tests?
-                const options = {
-                    ...baseOptions,
+                const params = {
                     body: {
                         name: spaceName,
                         multiple_assignees: true
                     }
                 }
 
-                cy.request(options).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then(function (resp) {
                     expect(resp.status).to.eq(200)
                     cy.wrap(resp.body.id).as('spaceId')
                 })
@@ -41,17 +32,7 @@ describe('Creating space', () => {
             })
 
             after(function () {
-                const optionsForDelete = {
-                    method: 'DELETE',
-                    url: `https://api.clickup.com/api/v2/space/${this.spaceId}`,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
-                    }
-                }
-                cy.request(optionsForDelete).then((resp) => {
-                    expect(resp.status).to.eq(200)
-                })
+                cy.apiRequest('DELETE', `/api/v2/space/${this.spaceId}`,)
             })
         })
 
@@ -60,48 +41,47 @@ describe('Creating space', () => {
         // Negative Test Cases
         context('with invalid params', () => {
             it('returns status code 401 when invalid token', () => {
-                const options = {
-                    ...baseOptions,
+                const params = {
                     headers: {
-                        ...baseOptions.headers,
                         Authorization: 'invalid_token'
                     },
                     body: {
                         name: 'Invalid token Space',
                         multiple_assignees: true
-                    }
+                    },
+                    failOnStatusCode: false
                 }
 
-                cy.request({ ...options, failOnStatusCode: false }).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then((resp) => {
                     expect(resp.status).to.eq(401)
                 })
             })
 
             it('returns status code 400 when missing space name', () => {
-                const options = {
-                    ...baseOptions,
+                const params = {
+                    failOnStatusCode: false,
                     body: {
                         name: '',
                         multiple_assignees: true,
                     }
                 }
 
-                cy.request({ ...options, failOnStatusCode: false }).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then((resp) => {
                     expect(resp.status).to.eq(400)
                     expect(resp.body.err).to.contain('Space name invalid')
                 })
             })
 
             it('returns status code 500 when invalid data type', () => {
-                const options = {
-                    ...baseOptions,
+                const params = {
+                    failOnStatusCode: false,
                     body: {
                         name: 'Invalid Data Type',
                         multiple_assignees: 'Viktoria'
                     }
                 }
 
-                cy.request({ ...options, failOnStatusCode: false }).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then((resp) => {
                     expect(resp.status).to.eq(500)
                     expect(resp.body.err).to.contain('invalid input syntax')
                 })
@@ -111,32 +91,21 @@ describe('Creating space', () => {
         // Boundary Test Cases
         context('with minimum space name length', () => {
             it('creates a new space and returns status code 200', () => {
-                const options = {
-                    ...baseOptions,
+                const params = {
                     body: {
                         name: 'A',
                         multiple_assignees: true
                     }
                 }
 
-                cy.request(options).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then(function (resp) {
                     expect(resp.status).to.eq(200)
                     cy.wrap(resp.body.id).as('spaceId')
                 })
             })
 
             after(function () {
-                const optionsForDelete = {
-                    method: 'DELETE',
-                    url: `https://api.clickup.com/api/v2/space/${this.spaceId}`,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'pk_42468827_FYLLFG10G4QMM8U1Z4V2AE9K3FTO4AFX'
-                    }
-                }
-                cy.request(optionsForDelete).then((resp) => {
-                    expect(resp.status).to.eq(200)
-                })
+                cy.apiRequest('DELETE', `/api/v2/space/${this.spaceId}`,)
             })
         })
     })
