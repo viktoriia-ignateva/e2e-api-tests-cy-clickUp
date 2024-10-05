@@ -23,3 +23,14 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('login', (email, password) => {
+    cy.clearCookies()
+    cy.clearAllLocalStorage()
+
+    cy.visit('https://app.clickup.com/login')
+    cy.get('[data-test="login-email-input"]').type(email)
+    cy.get('[data-test="login-password-input"]').type(password)
+    cy.get('[data-test="login-submit"]').click()
+    cy.get('[data-test="simple-sidebar"]', {timeout: 30000}).should('be.visible')
+})

@@ -2,25 +2,14 @@ const TEAM_ID = "9015570628"
 
 describe("Creating Task via UI", () => {
     before(() => {
-        // ToDo add a command for login
         // ToDO reusable selectors
         // ToDo add findByTestId
-
-        //cy.intercept("https://prod-eu-west-1-3.clickup.com/**").as(
-
-        cy.visit("https://app.clickup.com/login")
-        // cy.get('[data-test="login-email-input"]').type("ignateva.victoriia@gmail.com")
-        // cy.get('[data-test="login-password-input"]').type("GUksd$6U7vR:77k")
-        // cy.get('[data-test="login-submit"]').click()
-
-        cy.url({timeout: 30000}).should("include", TEAM_ID)
-        //cy.get("#loading-placeholder").should("not.be.visible")
+        cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
 
         // list is visible
         cy.get('[data-test="subcategory-row__List"]')
             .should("be.visible")
             .as("list")
-
         cy.get("@list").click()
     });
 

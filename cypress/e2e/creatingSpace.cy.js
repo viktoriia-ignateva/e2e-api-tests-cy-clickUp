@@ -11,17 +11,7 @@ describe('Creating space', () => {
     context('when creating a new space via API', () => {
         // ToDo check that no spaces there before run tests
         before(() => {
-            //ToDo add a command for login
-            //cy.clearCookies()
-            //cy.clearAllLocalStorage()
-
-            cy.visit('https://app.clickup.com/login')
-            // ToDo
-            // cy.get('[data-test="login-email-input"]').type('ignateva.victoriia@gmail.com')
-            // cy.get('[data-test="login-password-input"]').type('GUksd$6U7vR:77k')
-            // cy.get('[data-test="login-submit"]').click()
-            // ToDo waiting and check that page is loaded not url
-            cy.url({ timeout: 30000 }).should('contain', '9015570628')
+            cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
         })
 
         // Positive Test Case
