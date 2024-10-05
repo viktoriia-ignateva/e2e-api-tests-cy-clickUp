@@ -7,5 +7,6 @@ module.exports = defineConfig({
     },
     testIsolation: false,
     watchForFileChanges: false,
+    numTestsKeptInMemory: 5,
   },
 });

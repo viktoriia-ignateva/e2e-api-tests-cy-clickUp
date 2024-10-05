@@ -1,3 +1,12 @@
+import {
+    priorityLabelSel,
+    tagSel,
+    taskDescriptionSel,
+    taskIdButtonSel,
+    taskSel,
+    taskTitleSel
+} from "../support/selectors";
+
 const baseOptions = {
     method: 'POST',
     url: 'https://api.clickup.com/api/v2/list/901506912843/task',
@@ -9,39 +18,44 @@ const baseOptions = {
 
 describe('Creating Task via API', () => {
     before(() => {
-        cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
+        // cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
+        cy.visit('https://app.clickup.com/login')
+        cy.get('[data-test="simple-sidebar"]', {timeout: 30000}).should('be.visible')
     })
 
     // Positive Test Cases
     context('with valid params', () => {
         it('creates a task with minimal valid fields and shows it in UI ', function () {
+            const taskName = 'New Task via API with minimal valid fields cy'
             const options = {
                 ...baseOptions,
                 body: {
-                    "name": "New Task via API with minimal valid fields cy"
+                    "name": taskName
                 }
             }
 
             cy.request(options).then((resp) => {
-                cy.get('[data-test="task-row-main__New Task via API with minimal valid fields cy"]', {timeout: 60000}).should('be.visible')
-                cy.get('[data-test="task-row-main__New Task via API with minimal valid fields cy"]').click()
-                cy.get('[data-test="task-view-task-label__taskid-button"]').should('contain', resp.body.id)
-                cy.get('[data-test="task-title__title-overlay"]').should('contain', 'New Task via API with minimal valid fields cy')
+                cy.get(taskSel(taskName), {timeout: 60000}).click()
+                cy.get(taskIdButtonSel).should('contain', resp.body.id)
+                cy.get(taskTitleSel).should('contain', taskName)
 
                 return cy.wrap(resp.body.id).as('taskId')
             })
         })
 
         it('creates a task with all valid fields and shows it in UI', function () {
+            const taskName = 'New Task via API cy (!@#$%^&*)'
+            const priorityLabel = 'Urgent'
+            const tagName = 'tag name'
             const options = {
                 ...baseOptions,
                 body: {
-                    "name": "New Task via API cy (!@#$%^&*)",
+                    "name": taskName,
                     "description": "Task Description",
                     "tags": [
-                        "tag name"
+                        tagName
                     ],
-                    "priority": 1,
+                    "priority": 1, // Urgent
                     "due_date": 1508369194377,
                     "due_date_time": false,
                     "time_estimate": 8640000,
@@ -52,13 +66,12 @@ describe('Creating Task via API', () => {
             }
 
             cy.request(options).then((resp) => {
-                cy.get('[data-test="task-row-main__New Task via API cy (!@#$%^&*)"]', {timeout: 60000}).should('be.visible')
-                cy.get('[data-test="task-row-main__New Task via API cy (!@#$%^&*)"]').click()
-                cy.get('[data-test="task-view-task-label__taskid-button"]').should('contain', resp.body.id)
-                cy.get('[data-test="task-title__title-overlay"]').should('contain', 'New Task via API cy (!@#$%^&*)')
-                cy.get('[data-test="priorities-view__item-label-Urgent"]').should('contain', 'Urgent')
-                cy.get('[data-test="task-editor"] > div > div').should('contain', 'Task Description')
-                cy.get('[data-test="tags-select__name-shadow-tag name"]').should('contain', 'tag name')
+                cy.get(taskSel(taskName), {timeout: 60000}).click()
+                cy.get(taskIdButtonSel).should('contain', resp.body.id)
+                cy.get(taskTitleSel).should('contain', taskName)
+                cy.get(priorityLabelSel(priorityLabel)).should('contain', priorityLabel)
+                cy.get(taskDescriptionSel).should('contain', 'Task Description')
+                cy.get(tagSel(tagName)).should('contain', tagName)
                 // ToDo add date check
 
                 return cy.wrap(resp.body.id).as('taskId')

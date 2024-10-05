@@ -1,3 +1,5 @@
+import { spaceSel } from '../support/selectors';
+
 const baseOptions = {
     method: 'POST',
     url: 'https://api.clickup.com/api/v2/team/9015570628/space',
@@ -16,12 +18,14 @@ describe('Creating space', () => {
 
         // Positive Test Case
         context('with minimal valid fields', () => {
+            const spaceName = 'Space with correct params via API cy'
+
             it('creates a new space and returns status code 200', () => {
                 // ToDo no options inside tests?
                 const options = {
                     ...baseOptions,
                     body: {
-                        name: 'Space with correct params via API cy',
+                        name: spaceName,
                         multiple_assignees: true
                     }
                 }
@@ -33,7 +37,7 @@ describe('Creating space', () => {
             })
 
             it('shows the new created space', () => {
-                cy.get('[data-test="project-row__name__Space with correct params via API cy"]').should('be.visible')
+                cy.get(spaceSel(spaceName)).should('be.visible')
             })
 
             after(function () {

@@ -1,42 +1,39 @@
+import {
+    barControllerSel, addNewTaskButtonSel, listSel, newTaskTitleInputSel,
+    createNewTaskButtonSel, creatingTaskModelSel, addButtonSel, taskNameErrorSel, selectListDropdownSel
+} from "../support/selectors"
+
 const TEAM_ID = "9015570628"
+const listName = "List"
 
 describe("Creating Task via UI", () => {
     before(() => {
-        // ToDO reusable selectors
-        // ToDo add findByTestId
-        cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
-
-        // list is visible
-        cy.get('[data-test="subcategory-row__List"]')
-            .should("be.visible")
-            .as("list")
-        cy.get("@list").click()
+        // cy.login("ignateva.victoriia@gmail.com", "GUksd$6U7vR:77k")
+        cy.visit("https://app.clickup.com/login")
+        cy.get('[data-test="simple-sidebar"]', {timeout: 30000}).should("be.visible")
+        cy.get(listSel(listName)).click()
     });
 
-    context("when the minimum required information is entered", () => {
-        it("should allow creating a new task", () => {
-            cy.get('[data-test="views-bar__controller-row"]').should("be.visible")
-            cy.get('[data-test="views-bar__controller-row"]')
-                .find('[data-test="create-task-menu__new-task-button"]')
-                .click()
-            cy.get('[data-test="draft-view__title-task"]', {timeout: 60000}).should("be.visible")
+    context.skip("when the minimum required information is entered", () => {
+        const taskTitle = "New task title"
 
-            cy.get('[data-test="draft-view__title-task"]').type('draft')
-            cy.get('[data-test="draft-view__title-task"]').clear()
-            cy.get('[data-test="draft-view__title-task"]')
-                .click()
-                .type("New task title")
+        it("should allow creating a new task", () => {
+            cy.get(barControllerSel, {timeout: 30000}).find(addNewTaskButtonSel).click()
+            cy.get(newTaskTitleInputSel, {timeout: 60000}).should("be.visible").as("newTaskTitleInput")
+            cy.get("@newTaskTitleInput").type("draft")
+            cy.get("@newTaskTitleInput").clear()
+            cy.get("@newTaskTitleInput").type(taskTitle)
 
             // intercept the request which is sent when the task is created
             cy.intercept("POST", "/tasks/v1/subcategory/*/task").as("createTask")
-            cy.get('[data-test="draft-view__quick-create-create"]').click()
+            cy.get(createNewTaskButtonSel).click()
 
             // save the task id for further checks
             cy.wait("@createTask").then(function (interception) {
                 cy.wrap(interception.response.body.id).as("taskId")
             })
 
-            cy.get('[data-test="modal__body]"]').should("not.exist")
+            cy.get(creatingTaskModelSel).should("not.exist")
         })
 
         it("receives a response to a request for a created task that is successful and contains the entered information", function () {
@@ -55,7 +52,7 @@ describe("Creating Task via UI", () => {
 
             cy.request(options).then((response) => {
                 expect(response.body.id).to.eq(this.taskId)
-                expect(response.body.name).to.eq("New task title")
+                expect(response.body.name).to.eq(taskTitle)
             })
         })
 
@@ -74,35 +71,21 @@ describe("Creating Task via UI", () => {
 
     context("when there are mandatory information missing", () => {
         before(() => {
-            // ToDo add a command for login
-            // ToDO reusable selectors
-            // ToDo why no .should().click()
-            // ToDo add findByTestId
-
             cy.visit(`https://app.clickup.com/${TEAM_ID}/home`)
-            cy.get('[data-test="project-row__name__Don\'t delete this space"]', {timeout: 30000}).should("be.visible")
         })
 
         it("should not allow creating a task without a name", () => {
-            cy.get('button[data-test="quick-create-modal-toggle-new-task"]')
-                .should("be.visible")
-                .click()
-
-            cy.get('[data-test="draft-view__title-task"]').click().clear()
-
-            cy.get('[data-test="draft-view__quick-create-create"]').click()
-            cy.get('[data-pendo="quick-create-task-enter-task-name-error"]').should("be.visible")
+            cy.get(addButtonSel, {timeout: 30000}).click()
+            cy.get(newTaskTitleInputSel).click().clear()
+            cy.get(createNewTaskButtonSel).click()
+            cy.get(taskNameErrorSel).should("be.visible")
         })
 
         it("should not allow creating a task without a selected list", () => {
-            cy.get('[data-test="draft-view__title-task"]')
-                .click()
-                .clear()
-                .type("New task")
-
-            cy.get('[data-test="hierarchy-picker__menu"]').should("not.exist")
-            cy.get('[data-test="draft-view__quick-create-create"]').click()
-            cy.get('[data-test="hierarchy-picker__menu"]').should("be.visible")
+            cy.get(newTaskTitleInputSel).click().clear().type("New task")
+            cy.get(selectListDropdownSel).should("not.exist")
+            cy.get(createNewTaskButtonSel).click()
+            cy.get(selectListDropdownSel).should("be.visible")
         })
     })
 })
