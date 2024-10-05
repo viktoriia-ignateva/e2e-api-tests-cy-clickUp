@@ -8,7 +8,7 @@ const baseOptions = {
 }
 
 describe('Creating space', () => {
-    describe('when creating a new space via API', () => {
+    context('when creating a new space via API', () => {
         // ToDo check that no spaces there before run tests
         before(() => {
             //ToDo add a command for login
@@ -25,7 +25,7 @@ describe('Creating space', () => {
         })
 
         // Positive Test Case
-        context('with correct params', () => {
+        context('with minimal valid fields', () => {
             it('creates a new space and returns status code 200', () => {
                 // ToDo no options inside tests?
                 const options = {
@@ -61,9 +61,11 @@ describe('Creating space', () => {
             })
         })
 
+        // ToDo add test with all fields
+
         // Negative Test Cases
-        context('with invalid authorization token', () => {
-            it('returns status code 401', () => {
+        context('with invalid params', () => {
+            it('returns status code 401 when invalid token', () => {
                 const options = {
                     ...baseOptions,
                     headers: {
@@ -80,10 +82,8 @@ describe('Creating space', () => {
                     expect(resp.status).to.eq(401)
                 })
             })
-        })
 
-        context('with missing space name', () => {
-            it('returns status code 400', () => {
+            it('returns status code 400 when missing space name', () => {
                 const options = {
                     ...baseOptions,
                     body: {
@@ -97,10 +97,8 @@ describe('Creating space', () => {
                     expect(resp.body.err).to.contain('Space name invalid')
                 })
             })
-        })
 
-        context('with invalid data type', () => {
-            it('returns status code 500', () => {
+            it('returns status code 500 when invalid data type', () => {
                 const options = {
                     ...baseOptions,
                     body: {
