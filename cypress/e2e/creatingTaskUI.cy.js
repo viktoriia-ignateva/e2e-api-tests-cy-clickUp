@@ -82,4 +82,38 @@ describe("Creating Task via UI", () => {
             cy.request(optionsForDelete)
         })
     })
+
+    context("when there are mandatory information missing", () => {
+        before(() => {
+            // ToDo add a command for login
+            // ToDO reusable selectors
+            // ToDo why no .should().click()
+            // ToDo add findByTestId
+
+            cy.visit(`https://app.clickup.com/${TEAM_ID}/home`)
+            cy.get('[data-test="project-row__name__Don\'t delete this space"]', {timeout: 30000}).should("be.visible")
+        })
+
+        it("should not allow creating a task without a name", () => {
+            cy.get('button[data-test="quick-create-modal-toggle-new-task"]')
+                .should("be.visible")
+                .click()
+
+            cy.get('[data-test="draft-view__title-task"]').click().clear()
+
+            cy.get('[data-test="draft-view__quick-create-create"]').click()
+            cy.get('[data-pendo="quick-create-task-enter-task-name-error"]').should("be.visible")
+        })
+
+        it("should not allow creating a task without a selected list", () => {
+            cy.get('[data-test="draft-view__title-task"]')
+                .click()
+                .clear()
+                .type("New task")
+
+            cy.get('[data-test="hierarchy-picker__menu"]').should("not.exist")
+            cy.get('[data-test="draft-view__quick-create-create"]').click()
+            cy.get('[data-test="hierarchy-picker__menu"]').should("be.visible")
+        })
+    })
 })
