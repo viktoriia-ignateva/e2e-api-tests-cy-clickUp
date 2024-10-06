@@ -15,6 +15,8 @@ module.exports = defineConfig({
     configFile: 'reporter-config.json',
   },
   env: {
-    API_TOKEN: process.env.API_TOKEN
+    API_TOKEN: process.env.API_TOKEN,
+    USERNAME: process.env.USERNAME,
+    PASSWORD: process.env.PASSWORD
   },
 });

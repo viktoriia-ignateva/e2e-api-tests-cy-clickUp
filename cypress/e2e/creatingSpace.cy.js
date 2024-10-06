@@ -2,18 +2,17 @@ import {spaceSel} from '../support/selectors';
 
 describe('Creating space', () => {
     context('when creating a new space via API', () => {
-        // ToDo check that no spaces there before run tests
         before(() => {
-            // cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
-            cy.visit(`https://app.clickup.com/${Cypress.env('TEAM_ID')}/home`)
+            cy.login(Cypress.env('USERNAME'), Cypress.env('PASSWORD'))
+
+            cy.getTeamId()
         })
 
         // Positive Test Case
         context('with minimal valid fields', () => {
             const spaceName = 'Space with correct params via API cy'
 
-            it('creates a new space and returns status code 200', () => {
-                // ToDo no options inside tests?
+            it('creates a new space and returns status code 200', function () {
                 const params = {
                     body: {
                         name: spaceName,
@@ -21,9 +20,9 @@ describe('Creating space', () => {
                     }
                 }
 
-                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then(function (resp) {
+                cy.apiRequest('POST', `/api/v2/team/${this.teamId}/space`, params).then(function (resp) {
                     expect(resp.status).to.eq(200)
-                    cy.wrap(resp.body.id).as('spaceId')
+                    return cy.wrap(resp.body.id).as('spaceId')
                 })
             })
 
@@ -40,7 +39,7 @@ describe('Creating space', () => {
 
         // Negative Test Cases
         context('with invalid params', () => {
-            it('returns status code 401 when invalid token', () => {
+            it('returns status code 401 when invalid token', function () {
                 const params = {
                     headers: {
                         Authorization: 'invalid_token'
@@ -52,12 +51,12 @@ describe('Creating space', () => {
                     failOnStatusCode: false
                 }
 
-                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${this.teamId}/space`, params).then((resp) => {
                     expect(resp.status).to.eq(401)
                 })
             })
 
-            it('returns status code 400 when missing space name', () => {
+            it('returns status code 400 when missing space name', function () {
                 const params = {
                     failOnStatusCode: false,
                     body: {
@@ -66,13 +65,13 @@ describe('Creating space', () => {
                     }
                 }
 
-                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${this.teamId}/space`, params).then((resp) => {
                     expect(resp.status).to.eq(400)
                     expect(resp.body.err).to.contain('Space name invalid')
                 })
             })
 
-            it('returns status code 500 when invalid data type', () => {
+            it('returns status code 500 when invalid data type', function () {
                 const params = {
                     failOnStatusCode: false,
                     body: {
@@ -81,7 +80,7 @@ describe('Creating space', () => {
                     }
                 }
 
-                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then((resp) => {
+                cy.apiRequest('POST', `/api/v2/team/${this.teamId}/space`, params).then((resp) => {
                     expect(resp.status).to.eq(500)
                     expect(resp.body.err).to.contain('invalid input syntax')
                 })
@@ -90,7 +89,7 @@ describe('Creating space', () => {
 
         // Boundary Test Cases
         context('with minimum space name length', () => {
-            it('creates a new space and returns status code 200', () => {
+            it('creates a new space and returns status code 200', function (){
                 const params = {
                     body: {
                         name: 'A',
@@ -98,7 +97,7 @@ describe('Creating space', () => {
                     }
                 }
 
-                cy.apiRequest('POST', `/api/v2/team/${Cypress.env('TEAM_ID')}/space`, params).then(function (resp) {
+                cy.apiRequest('POST', `/api/v2/team/${this.teamId}/space`, params).then(function (resp) {
                     expect(resp.status).to.eq(200)
                     cy.wrap(resp.body.id).as('spaceId')
                 })

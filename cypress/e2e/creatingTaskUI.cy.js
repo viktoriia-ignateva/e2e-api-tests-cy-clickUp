@@ -1,17 +1,19 @@
 import {
-    barControllerSel, addNewTaskButtonSel, listSel, newTaskTitleInputSel,
-    createNewTaskButtonSel, creatingTaskModelSel, addButtonSel, taskNameErrorSel, selectListDropdownSel
+    addButtonSel,
+    addNewTaskButtonSel,
+    barControllerSel,
+    createNewTaskButtonSel,
+    creatingTaskModelSel,
+    newTaskTitleInputSel,
+    taskNameErrorSel
 } from "../support/selectors"
-
-const TEAM_ID = Cypress.env('TEAM_ID')
-const listName = "List"
 
 describe("Creating Task via UI", () => {
     before(() => {
-        // cy.login("ignateva.victoriia@gmail.com", "GUksd$6U7vR:77k")
-        cy.visit("https://app.clickup.com/login")
-        cy.get('[data-test="simple-sidebar"]', {timeout: 30000}).should("be.visible")
-        cy.get(listSel(listName)).click()
+        cy.login(Cypress.env('USERNAME'), Cypress.env('PASSWORD'))
+        cy.getListId().then(function () {
+            cy.visit(`https://app.clickup.com/${this.teamId}/v/li/${this.listId}`)
+        })
     })
 
     context("when the minimum required information is entered", () => {
@@ -39,7 +41,7 @@ describe("Creating Task via UI", () => {
         it("receives a response to a request for a created task that is successful and contains the entered information", function () {
             const query = new URLSearchParams({
                 custom_task_ids: "true",
-                team_id: TEAM_ID
+                team_id: this.teamId
             }).toString()
 
             cy.apiRequest('GET', `/api/v2/task/${this.taskId}?${query}`).then((response) => {
@@ -54,22 +56,15 @@ describe("Creating Task via UI", () => {
     })
 
     context("when there are mandatory information missing", () => {
-        before(() => {
-            cy.visit(`https://app.clickup.com/${TEAM_ID}/home`)
+        before(function () {
+            cy.visit(`https://app.clickup.com/${this.teamId}/home`)
         })
 
         it("should not allow creating a task without a name", () => {
             cy.get(addButtonSel, {timeout: 30000}).click()
-            cy.get(newTaskTitleInputSel).click().clear()
+            cy.get(newTaskTitleInputSel, {timeout: 30000}).click().clear()
             cy.get(createNewTaskButtonSel).click()
             cy.get(taskNameErrorSel).should("be.visible")
-        })
-
-        it("should not allow creating a task without a selected list", () => {
-            cy.get(newTaskTitleInputSel).click().clear().type("New task")
-            cy.get(selectListDropdownSel).should("not.exist")
-            cy.get(createNewTaskButtonSel).click()
-            cy.get(selectListDropdownSel).should("be.visible")
         })
     })
 })

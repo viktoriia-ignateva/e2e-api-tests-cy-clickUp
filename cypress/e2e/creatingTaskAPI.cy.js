@@ -3,17 +3,14 @@ import {
     tagSel,
     taskDescriptionSel,
     taskIdButtonSel,
-    taskSel,
     taskTitleSel
 } from "../support/selectors";
 
-const LIST_ID = 901506912843
-
 describe('Creating Task via API', () => {
     before(() => {
-        // cy.login('ignateva.victoriia@gmail.com', 'GUksd$6U7vR:77k')
-        cy.visit('https://app.clickup.com/login')
-        cy.get('[data-test="simple-sidebar"]', {timeout: 30000}).should('be.visible')
+        cy.login(Cypress.env('USERNAME'), Cypress.env('PASSWORD'))
+
+        cy.getListId()
     })
 
     // Positive Test Cases
@@ -26,9 +23,9 @@ describe('Creating Task via API', () => {
                 }
             }
 
-            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
-                cy.get(taskSel(taskName), {timeout: 60000}).click()
-                cy.get(taskIdButtonSel).should('contain', resp.body.id)
+            cy.apiRequest('POST', `/api/v2/list/${this.listId}/task`, params).then((resp) => {
+                cy.visit(`https://app.clickup.com/t/${resp.body.id}`)
+                cy.get(taskIdButtonSel, { timeout: 30000 }).should('contain', resp.body.id)
                 cy.get(taskTitleSel).should('contain', taskName)
 
                 return cy.wrap(resp.body.id).as('taskId')
@@ -57,9 +54,9 @@ describe('Creating Task via API', () => {
                 }
             }
 
-            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
-                cy.get(taskSel(taskName), {timeout: 60000}).click()
-                cy.get(taskIdButtonSel).should('contain', resp.body.id)
+            cy.apiRequest('POST', `/api/v2/list/${this.listId}/task`, params).then((resp) => {
+                cy.visit(`https://app.clickup.com/t/${resp.body.id}`)
+                cy.get(taskIdButtonSel, { timeout: 30000 }).should('contain', resp.body.id)
                 cy.get(taskTitleSel).should('contain', taskName)
                 cy.get(priorityLabelSel(priorityLabel)).should('contain', priorityLabel)
                 cy.get(taskDescriptionSel).should('contain', 'Task Description')
@@ -79,7 +76,7 @@ describe('Creating Task via API', () => {
 
     // Negative Test Cases
     context('with invalid params', () => {
-        it('returns status code 400 when missing task name', () => {
+        it('returns status code 400 when missing task name', function () {
             const params = {
                 body: {
                     name: ''
@@ -87,13 +84,13 @@ describe('Creating Task via API', () => {
                 failOnStatusCode: false
             }
 
-            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
+            cy.apiRequest('POST', `/api/v2/list/${this.listId}/task`, params).then((resp) => {
                 expect(resp.status).to.eq(400)
                 expect(resp.body.err).to.contain('Task name invalid')
             })
         })
 
-        it('returns status code 400 when invalid data type', () => {
+        it('returns status code 400 when invalid data type', function () {
             const params = {
                 body: {
                     "name": "New Task with invalid data type via API cy",
@@ -102,7 +99,7 @@ describe('Creating Task via API', () => {
                 failOnStatusCode: false
             }
 
-            cy.apiRequest('POST', `/api/v2/list/${LIST_ID}/task`, params).then((resp) => {
+            cy.apiRequest('POST', `/api/v2/list/${this.listId}/task`, params).then((resp) => {
                 expect(resp.status).to.eq(400)
                 expect(resp.body.err).to.contain('Date invalid')
             })
