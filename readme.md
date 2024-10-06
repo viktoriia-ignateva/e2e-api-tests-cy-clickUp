@@ -31,7 +31,30 @@ To set up the project locally, follow these steps:
     npm install
     ```
 
+3. Create a new ClickUp test user by signing up at [ClickUp Signup](https://app.clickup.com/signup).
+
+4. Create a new `.env` file in the root directory of the project and add the username and password using the following commands:
+    ```sh
+    echo "USERNAME=your_username" >> .env
+    echo "PASSWORD=your_password" >> .env
+    ```
+
+5. Obtain the API token for the user from the [ClickUp Developer Portal](https://clickup.com/api/developer-portal/authentication/#generate-your-personal-api-token) and add the `API_TOKEN` to the `.env` file:
+    ```sh
+    echo "API_TOKEN=your_api_token" >> .env
+    ```
+
+   Alternatively, you can manually create the `.env` file and add the following entries:
+
+    ```
+    USERNAME=your_username
+    PASSWORD=your_password
+    API_TOKEN=your_api_token
+    ```
+
 ## Usage
+
+> **Important Note:** During the test run, the login process might fail due to reCAPTCHA challenges. This needs to be manually handled by the user. If this occurs, please resolve the reCAPTCHA and run the test again.
 
 ### Running Cypress Tests
 
