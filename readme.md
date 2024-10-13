@@ -1,10 +1,10 @@
 # Assessment
 
-This project is a Cypress-based end-to-end testing suites for the Lodgify assessment. It ensures the application's functionality through comprehensive test cases, including positive, negative and boundary scenarios. The suite generates detailed test reports for analysis.
+This project is a Cypress-based end-to-end testing suites for the assessment. It ensures the application's functionality through comprehensive test cases, including positive, negative and boundary scenarios. The suite generates detailed test reports for analysis.
 
 ## Table of Contents
 
-- [Lodgify Assessment](#lodgify-assessment)
+- [Assessment](#assessment)
     - [Table of Contents](#table-of-contents)
     - [Installation](#installation)
     - [Usage](#usage)
@@ -22,8 +22,8 @@ To set up the project locally, follow these steps:
 
 1. Clone the git repository:
     ```sh
-    git clone https://github.com/viktoriia-ignateva/lodgify-assessment.git
-    cd lodgify-assessment
+    git clone https://github.com/viktoriia-ignateva/job-assessment.git
+    cd job-assessment
     ```
 
 2. Install the dependencies:
