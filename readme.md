@@ -1,4 +1,4 @@
-# Lodgify Assessment
+# Assessment
 
 This project is a Cypress-based end-to-end testing suites for the Lodgify assessment. It ensures the application's functionality through comprehensive test cases, including positive, negative and boundary scenarios. The suite generates detailed test reports for analysis.
 
